@@ -1,7 +1,7 @@
 import { camelize, hasOwn, isFunction, isString } from '@vue/shared'
 import type { Declaration, Helpers, Plugin, Rule } from 'postcss'
 import {
-  COMBINATORS_RE,
+  // COMBINATORS_RE,
   LENGTH_REGEXP,
   type NormalizeOptions,
   SUPPORT_CSS_UNIT,
@@ -33,22 +33,23 @@ function createRuleProcessor(opts: NormalizeOptions = {}) {
     }
     rule.selector = rule.selectors
       .map((selector) => {
-        selector = selector
-          .replace(/\s*([\+\~\>])\s*/g, '$1')
-          .replace(/\s+/, ' ')
-        if (COMBINATORS_RE.test(selector)) {
-          return selector
-        }
-        let type = opts.type || 'nvue'
-        rule.warn(
-          helper.result,
-          'ERROR: Selector `' +
-            selector +
-            '` is not supported. ' +
-            type +
-            ' only support classname selector'
-        )
-        return ''
+        return selector
+        // selector = selector
+        //   .replace(/\s*([\+\~\>])\s*/g, '$1')
+        //   .replace(/\s+/, ' ')
+        // if (COMBINATORS_RE.test(selector)) {
+        //   return selector
+        // }
+        // let type = opts.type || 'nvue'
+        // rule.warn(
+        //   helper.result,
+        //   'ERROR: Selector `' +
+        //     selector +
+        //     '` is not supported. ' +
+        //     type +
+        //     ' only support classname selector'
+        // )
+        // return ''
       })
       .filter(Boolean)
       .join(', ')

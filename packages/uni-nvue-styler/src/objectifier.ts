@@ -1,6 +1,7 @@
 import type { Container, Document, Root } from 'postcss'
 import { extend, hasOwn } from '@vue/shared'
-import { COMBINATORS_RE } from './utils'
+// import { COMBINATORS_RE } from './utils'
+import parser from 'postcss-selector-parser'
 
 interface ObjectifierContext {
   'FONT-FACE': Record<string, unknown>[]
@@ -72,25 +73,36 @@ function transform(
   })
   return result
 }
-
+const processer = parser()
 function transformSelector(
   selector: string,
   body: Record<string, unknown>,
   result: Record<string, unknown | Record<string, unknown>>,
   context: ObjectifierContext
 ) {
-  const res = selector.match(COMBINATORS_RE)
-  if (!res) {
-    return
+  const ans = processer.astSync(selector)
+  let sele = ans.nodes[0]
+  const currSel = parser.selector({ value: '' })
+  let lastCombinator = -1
+  // 定位最后一个组合选择器
+  for (let i = sele.nodes.length - 1; i >= 0; i--) {
+    if (sele.nodes[i].type === 'combinator') {
+      lastCombinator = i
+      break
+    }
   }
-  let parentSelector = res[1]
-  let curSelector = res[2].substring(1)
-  // .a.b => a.b
-  const dotIndex = curSelector.indexOf('.')
-  if (dotIndex > -1) {
-    parentSelector += curSelector.substring(dotIndex)
-    curSelector = curSelector.substring(0, dotIndex)
+  // 添加组合选择器的下一个选择器
+  currSel.append(sele.nodes.splice(lastCombinator + 1, 1) as any)
+  if (
+    sele.nodes[lastCombinator + 1] &&
+    sele.nodes[lastCombinator + 1].type === 'pseudo'
+  ) {
+    // 添加伪类选择器
+    currSel.append(sele.nodes.splice(lastCombinator + 1, 1) as any)
   }
+  let parentSelector = ans.toString()
+  // .a:checked => a:checked
+  let curSelector = currSel.toString().substring(1)
 
   const pseudoIndex = curSelector.indexOf(':')
   if (pseudoIndex > -1) {

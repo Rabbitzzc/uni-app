@@ -160,7 +160,7 @@ describe('uvue-style', () => {
   test('css calc', async () => {
     const { code, messages } = await parse(
       `
-        .content {
+        .content\\! {
             top: calc(var(--window-top) + 10px);
             bottom: calc(10px - var(--window-bottom));
             height: calc(var(--status-bar-height) * 2);
